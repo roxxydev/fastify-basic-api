@@ -1,0 +1,44 @@
+{
+  "name": "fastify-sample",
+  "version": "0.0.1",
+  "description": "Sample project implementing Fastify",
+  "main": "index.js",
+  "author": "roxxydev",
+  "license": "MIT",
+  "scripts": {
+    "start": "node index.js",
+    "test": "jest --coverage"
+  },
+  "dependencies": {
+    "dotenv": "8.2.x",
+    "fastify": "2.15.x",
+    "fastify-plugin": "2.3.x",
+    "fluent-schema": "1.0.x",
+    "knex": "0.21.x",
+    "pg": "8.3.x",
+    "pino-pretty": "^4.2.x"
+  },
+  "devDependencies": {
+    "jest": "26.1.x"
+  },
+  "eslintConfig": {
+    "extends": [
+      "eslint:recommended",
+      "plugin:react/recommended"
+    ],
+    "env": {
+      "node": true,
+      "es11": true,
+      "browser": true
+    },
+    "parserOptions": {
+      "ecmaVersion": 11,
+      "sourceType": "module"
+    }
+  },
+  "jest": {
+    "testMatch": [
+      "**/test/**/*.js?(x)"
+    ]
+  }
+}
