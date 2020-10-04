@@ -1,14 +1,16 @@
-Demo of api server using Fastify.
+Example api using Fastify.
 
 ## Project setup
 ```
 npm install
 ```
 
-### `npm start`
+#### `npm start`
 Start fastify server config values set in .env file
 
-#### Account
+---
+
+### Account
 
 ***Register***
 
@@ -41,9 +43,9 @@ Content-Type: application/json
 }
 ```
 
-***Fetch Account***
+***Get Account***
 
-Get account details.
+Fetch account details.
 
 ```curl
 curl http://localhost:8088/api/v0/account/1
@@ -66,7 +68,9 @@ Content-Type: application/json
 }
 ```
 
-#### Profile
+---
+
+### Profile
 
 ***Create Profile***
 
@@ -109,9 +113,9 @@ Content-Type: application/json
 }
 ```
 
-***Fetch Profile***
+***GET Profile***
 
-Get profile details.
+Fetch profile details.
 
 ```curl
 curl http://localhost:8088/api/v0/profile/1
