@@ -28,7 +28,6 @@ module.exports = async () => {
                     url: request.url,
                     path: request.path,
                     parameters: request.parameters,
-                    body: request.body,
                     headers: request.headers,
                 }
             },
@@ -52,10 +51,18 @@ module.exports = async () => {
 
     fastify.log.info(`Setting up logger...`);
     await fastify.register(FastifySensible);
+
     await fastify.addHook('onSend', async (request, reply, payload) => {
 
         if (payload) {
             fastify.log.debug({ body: payload }, `response payload reqId: ${ request.id }`);
+        }
+    });
+
+    await fastify.addHook('preValidation', async (request, reply) => {
+
+        if (request && request.body) {
+            fastify.log.debug({ body: request.body }, `request payload reqId: ${ request.id }`);
         }
     });
 

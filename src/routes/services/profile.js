@@ -2,7 +2,7 @@
 
 const Model = require('../../schema/models');
 const { AccountService } = require('../services/account');
-const { ['name']: modelName } = Model.profile;
+const { ['name']: modelName, props } = Model.profile;
 
 
 class ProfileService {
@@ -41,6 +41,7 @@ class ProfileService {
 
         const accountService = new AccountService(this.app);
         await accountService.get({ id: payload.accountId });
+        payload[props.accountId] = payload.accountId;
         delete payload.accountId;
 
         const data = await this.knex(modelName).insert(payload, '*');

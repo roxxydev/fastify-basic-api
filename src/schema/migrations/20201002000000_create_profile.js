@@ -1,13 +1,18 @@
 'use strict';
 
 const Models = require('../models');
-const { name, props } = Models.profile;
+const profile = Models.profile;
+const account = Models.account;
 
 const up = async (knex) => {
 
+    const { name } = profile;
     const exists = await knex.schema.hasTable(name);
 
     if (!exists) {
+
+        const { props } = profile;
+        const accountModelName = account.name;
 
         return knex.schema.createTable(name, (table) => {
 
@@ -19,7 +24,12 @@ const up = async (knex) => {
             table.date(props.birthday).notNullable();
             table.timestamps(true, true);
 
-            table.integer('account_id').references('id').inTable(name);
+            table.integer('account_id')
+                .notNullable()
+                .references('id')
+                .inTable(accountModelName);
+
+            table.unique(['id', 'account_id']);
         });
     }
 };

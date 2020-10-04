@@ -11,6 +11,7 @@ module.exports = {
     profile: {
         name: 'profile',
         props: {
+            accountId: 'account_id',
             firstName: 'firstName',
             lastName: 'lastName',
             middleName: 'middleName',

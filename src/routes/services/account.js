@@ -37,7 +37,7 @@ class AccountService {
             payload[props.password] = await this.app.utils.encryptPswd(payload[props.password]);
         }
 
-        const returningProps = [props.username, 'created_at'];
+        const returningProps = ['id', props.username, 'created_at'];
         const data = await this.knex(modelName).insert(payload, returningProps);
         const [account] = data;
 
@@ -50,7 +50,7 @@ class AccountService {
     async get (args) {
 
         const { id, username } = args;
-        const returningProps = [props.username, 'created_at'];
+        const returningProps = ['id', props.username, 'created_at'];
 
         if (username) {
             const accounts = await this.knex.select(returningProps).from(modelName).where({
