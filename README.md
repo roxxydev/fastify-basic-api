@@ -11,6 +11,7 @@ Start fastify server config values set in .env file
 #### Account
 
 ***Register***
+
 Create account passing basic account information.
 
 * Request:
@@ -37,6 +38,7 @@ Content-Type: application/json
 ```
 
 ***Fetch Account***
+
 Get account details.
 
 * Request:
@@ -59,6 +61,7 @@ Content-Type: application/json
 #### Profile
 
 ***Create Profile***
+
 Add account profile details.
 
 * Request:
@@ -95,6 +98,7 @@ Content-Type: application/json
 ```
 
 ***Fetch Profile***
+
 Get profile details.
 
 * Request:
