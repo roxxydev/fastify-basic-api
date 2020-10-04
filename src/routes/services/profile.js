@@ -1,6 +1,7 @@
 'use strict';
 
 const Model = require('../../schema/models');
+const { AccountService } = require('../services/account');
 const { ['name']: modelName } = Model.profile;
 
 
@@ -12,42 +13,41 @@ class ProfileService {
      * @memberof ProfileService
      */
     constructor (app) {
-
         if (!app.ready) {
 
             throw new Error(`can't get .ready from fastify app.`);
         }
         this.app = app;
 
-        const { knex } = this.app;
-
-        if (!knex) {
+        if (!app.knex) {
             throw new Error('cant get .knex from fastify app.');
         }
+        this.knex = app.knex;
     }
 
     /**
      * function to create one
      *
-     * @param { {profile: object} } { profile }
+     * @param { {payload: object} } { payload }
      * @returns {Promise<number>} created id
      * @memberof ProfileService
      */
-    async create ({ profile }) {
+    async create ({ payload }) {
 
-        const err = new Error();
-        if (!profile) {
-            err.statusCode = 400;
-            err.message = 'profile is needed.';
+        if (!payload) {
 
-            throw err;
+            throw this.app.httpErrors.badRequest('missing payload');
         }
 
-        const { knex } = this.app;
-        const id = (await knex(modelName).insert(profile))[0];
-        const createdProfile = await this.getOne({ id });
+        const accountService = new AccountService(this.app);
+        await accountService.get({ id: payload.accountId });
+        delete payload.accountId;
 
-        return createdProfile;
+        const data = await this.knex(modelName).insert(payload, '*');
+        delete data.created_at;
+        const [profile] = data;
+
+        return profile;
     }
 
     /**
@@ -59,38 +59,30 @@ class ProfileService {
      */
     async getAll ({ filter = {} }) {
 
-        const { knex } = this.app;
-        const profiles = await knex.select('*').from(modelName).where(filter);
+        const profiles = await this.knex.select('*').from(modelName).where(filter);
 
         return profiles;
     }
 
     /**
-     * function to get one
+     * function to get
      *
      * @param { { id: number } } { id }
      * @returns {Promise<{id: number}>} object
      * @memberof ProfileService
      */
-    async getOne ({ id }) {
-
-        const err = new Error();
+    async get ({ id }) {
 
         if (!id) {
-            err.message = 'id is needed';
-            err.statusCode = 400;
 
-            throw err;
+            throw this.app.httpErrors.badRequest('id missing.');
         }
 
-        const { knex } = this.app;
-        const data = await knex.select('*').from(modelName).where({ id });
+        const data = await this.knex.select('*').from(modelName).where({ id });
 
         if (!data.length) {
-            err.statusCode = 412;
-            err.message = `can't get the profile ${id}.`;
 
-            throw err;
+            throw this.app.httpErrors.notFound(`profile ${id} not found.`);
         }
 
         const [profile] = data;
@@ -107,18 +99,13 @@ class ProfileService {
      */
     async update ({ id, profile = {} }) {
 
-        const profileBefore = await this.getOne({ id });
+        const profileBefore = await this.get({ id });
 
-        if (isEmptyObject(profile)) {
-            return profileBefore;
-        }
-
-        const { knex } = this.app;
-        await knex(modelName)
+        await this.knex(modelName)
             .update(profile)
             .where({ id: profileBefore.id });
 
-        const profileAfter = await this.getOne({ id });
+        const profileAfter = await this.get({ id });
 
         return profileAfter;
     }
@@ -132,11 +119,9 @@ class ProfileService {
      */
     async delete ({ id }) {
 
-        const profileBefore = await this.getOne({ id });
+        const profileBefore = await this.get({ id });
 
-        const { knex } = this.app;
-        await knex(modelName).where({ id }).delete();
-
+        await this.knex(modelName).where({ id }).delete();
         delete profileBefore.id;
 
         return profileBefore;

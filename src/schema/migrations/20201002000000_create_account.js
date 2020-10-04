@@ -1,7 +1,7 @@
 'use strict';
 
 const Models = require('../models');
-const { name, props } = Models.profile;
+const { name, props } = Models.account;
 
 const up = async (knex) => {
 
@@ -12,21 +12,16 @@ const up = async (knex) => {
         return knex.schema.createTable(name, (table) => {
 
             table.increments('id');
-            table.string(props.firstName).notNullable();
-            table.string(props.lastName).notNullable();
-            table.string(props.middleName);
-            table.string(props.gender).notNullable();
-            table.date(props.birthday).notNullable();
+            table.string(props.username).notNullable();
+            table.string(props.password).notNullable();
             table.timestamps(true, true);
-
-            table.integer('account_id').references('id').inTable(name);
         });
     }
 };
 
 const down = (knex) => {
 
-    return knex.schema.dropTable(name)
+    return knex.schema.dropTable(name);
 };
 
 const config = {

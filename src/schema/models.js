@@ -1,6 +1,13 @@
 'use strict';
 
 module.exports = {
+    account: {
+        name: 'account',
+        props: {
+            username: 'username',
+            password: 'password'
+        }
+    },
     profile: {
         name: 'profile',
         props: {

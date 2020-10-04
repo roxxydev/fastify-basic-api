@@ -10,9 +10,11 @@
     "test": "jest --coverage"
   },
   "dependencies": {
+    "bcrypt": "5.0.x",
     "dotenv": "8.2.x",
-    "fastify": "2.15.x",
+    "fastify": "3.5.x",
     "fastify-plugin": "2.3.x",
+    "fastify-sensible": "3.0.x",
     "fluent-schema": "1.0.x",
     "knex": "0.21.x",
     "pg": "8.3.x",

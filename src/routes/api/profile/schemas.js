@@ -5,6 +5,7 @@ const Model = require('../../../schema/models');
 
 
 const { name, props } = Model.profile;
+Object.assign(props, Model.account.props);
 
 const GENDER = {
     MALE: 'male',
@@ -19,14 +20,20 @@ const profileSchema = {
     firstName: {
         key: props.firstName,
         type: S.string()
+            .minLength(1)
+            .maxLength(100)
     },
     lastName: {
         key: props.lastName,
         type: S.string()
+            .minLength(1)
+            .maxLength(100)
     },
     middleName: {
         key: props.middleName,
         type: S.string()
+            .minLength(1)
+            .maxLength(100)
     },
     gender: {
         key: props.gender,

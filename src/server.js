@@ -2,43 +2,92 @@
 'use strict';
 
 const Fastify = require('fastify');
+const FastifySensible = require('fastify-sensible');
 const KnexConnector = require('./plugins/knexdbConnector');
 const Routes = require('./routes/api');
+const Environment = require('./environment');
+const Utils = require('./utils');
 
-
-const {
-    APP_HOST,
-    APP_PORT
-} = require('./environment');
 
 module.exports = async () => {
 
-    const fastify = Fastify({
-        logger: {
-            level: 'trace',
-            prettyPrint: true
+    // level: trace - log all, error - log only ERROR
+    const logger = {
+        level: 'trace',
+        prettyPrint: true,
+        redact: ['req.headers.authorization'],
+        serializers: {
+            res(reply) {
+                return {
+                    statusCode: reply.statusCode
+                }
+            },
+            req(request) {
+                return {
+                    method: request.method,
+                    url: request.url,
+                    path: request.path,
+                    parameters: request.parameters,
+                    body: request.body,
+                    headers: request.headers,
+                }
+            },
         },
+    };
+
+    const fastify = Fastify({
+        logger: logger,
         ignoreTrailingSlash: true,
         maxParamLength: 200
     });
 
-    await fastify.register(KnexConnector, {});
-    await fastify.register(Routes, { prefix: 'api' });
+    const utilities = {}
+    for (const method of Utils) {
+        Object.assign(utilities, method);
+    }
 
-    await fastify.get('/', async () => {
+    fastify.log.info(`Setting up objects...`);
+    await fastify.decorate('conf', Environment);
+    await fastify.decorate('utils', utilities);
 
-        return {};
+    fastify.log.info(`Setting up logger...`);
+    await fastify.register(FastifySensible);
+    await fastify.addHook('onSend', async (request, reply, payload) => {
+
+        if (payload) {
+            fastify.log.debug({ body: payload }, `response payload reqId: ${ request.id }`);
+        }
+    });
+
+    fastify.log.info(`Setting up query builder...`);
+    const config = fastify.conf;
+    await fastify.register(KnexConnector, {
+        client: config.DB_SQL_CLIENT,
+        connection: {
+            host: config.DB_SQL_HOST,
+            user: config.DB_SQL_USER,
+            password: config.DB_SQL_PASSWORD,
+            database: config.DB_SQL_NAME,
+            port: config.DB_SQL_PORT
+        }
+    });
+
+    fastify.log.info(`Setting up routes...`);
+    await fastify.ready(() => {
+
+        fastify.log.info(`Added routes:\n${ fastify.printRoutes() }`);
+    });
+
+    await fastify.register(Routes, {
+         prefix: `${ config.API_PREFIX }/${ config.API_VERSION }`
     });
 
     const start = async () => {
 
         try {
-
-            const address = await fastify.listen(APP_PORT, APP_HOST);
-            fastify.log.info(`intiialized server with config: ${ fastify.initialConfig }`);
-            fastify.log.info(`server listening on ${ address }`);
+            await fastify.listen(config.APP_PORT, config.APP_HOST);
+            fastify.log.info('Intiialized server with config:', fastify.initialConfig);
         } catch (err) {
-
             fastify.log.error(err);
             process.exit(1);
         }

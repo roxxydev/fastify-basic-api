@@ -18,8 +18,7 @@ const profileRoutes = async (app) => {
     app.post('/', { schema: createSchema }, async (request, reply) => {
 
         const { body } = request;
-
-        const created = await profileService.create({ profile: body });
+        const created = await profileService.create({ payload: body });
 
         return created;
     });
@@ -27,7 +26,6 @@ const profileRoutes = async (app) => {
     // get all
     app.get('/', { schema: getAllSchema }, async (request, reply) => {
 
-        app.log.info('request.query', request.query);
         const profiles = await profileService.getAll({});
 
         return profiles;
@@ -37,10 +35,7 @@ const profileRoutes = async (app) => {
     app.get('/:profileId', { schema: getOneSchema }, async (request, reply) => {
 
         const { params: { profileId } } = request;
-
-        app.log.info('profileId', profileId);
-
-        const profile = await profileService.getOne({ id: profileId });
+        const profile = await profileService.get({ id: profileId });
 
         return profile;
     });
@@ -49,12 +44,7 @@ const profileRoutes = async (app) => {
     app.patch('/:profileId', { schema: updateSchema }, async (request, reply) => {
 
         const { params: { profileId } } = request;
-
         const { body } = request;
-
-        app.log.info('profileId', profileId);
-        app.log.info('body', body);
-
         const updated = await profileService.update({ id: profileId, profile: body });
 
         return updated;
@@ -64,9 +54,6 @@ const profileRoutes = async (app) => {
     app.delete('/:profileId', { schema: deleteSchema }, async (request, reply) => {
 
         const { params: { profileId } } = request;
-
-        app.log.info('profileId', profileId);
-
         const deleted = await profileService.delete({ id: profileId });
 
         return deleted;

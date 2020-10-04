@@ -2,6 +2,7 @@
 
 const Dotenv = require('dotenv');
 const Path = require('path');
+const Fs = require('fs');
 
 Dotenv.config({ path: Path.resolve(__dirname, '../.env') });
 
@@ -23,18 +24,22 @@ switch (NODE_ENV) {
     break;
 };
 
-Dotenv.config({ path: envPath });
+if (envPath && Fs.existsSync(envPath)) {
+    Dotenv.config({ path: envPath });
+}
 
 const enviroment = {
   NODE_ENV,
   APP_HOST: process.env.APP_HOST || '127.0.0.1',
   APP_PORT: process.env.APP_PORT || 8080,
-  DB_SQL_CLIENT: process.env.DB_SQL_CLIENT,
-  DB_SQL_HOST: process.env.DB_SQL_HOST,
-  DB_SQL_USER: process.env.DB_SQL_USER,
-  DB_SQL_PASSWORD: process.env.DB_SQL_PASSWORD,
-  DB_SQL_NAME: process.env.DB_SQL_NAME,
-  DB_SQL_PORT: process.env.DB_SQL_PORT
+  API_PREFIX: process.env.API_PREFIX || 'apis',
+  API_VERSION: process.env.API_VERSION || 'v0',
+  DB_SQL_CLIENT: process.env.DB_SQL_CLIENT || 'pg',
+  DB_SQL_HOST: process.env.DB_SQL_HOST || 'localhost',
+  DB_SQL_USER: process.env.DB_SQL_USER || 'postgres',
+  DB_SQL_PASSWORD: process.env.DB_SQL_PASSWORD || 'postgres',
+  DB_SQL_NAME: process.env.DB_SQL_NAME || 'fastify',
+  DB_SQL_PORT: process.env.DB_SQL_PORT || 5432
 };
 
 module.exports = enviroment;
