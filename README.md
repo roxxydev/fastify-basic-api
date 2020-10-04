@@ -14,6 +14,10 @@ Start fastify server config values set in .env file
 
 Create account passing basic account information.
 
+```curl
+curl --header "Content-Type: application/json" --request POST --data '{"username":"foo10001","password":""}' http://localhost:8088/api/v0/account/register
+```
+
 * Request:
 ```json
 POST /api/v0/account HTTP/1.1
@@ -41,6 +45,10 @@ Content-Type: application/json
 
 Get account details.
 
+```curl
+curl http://localhost:8088/api/v0/account/1
+```
+
 * Request:
 ```json
 GET /api/v0/account/:accountId HTTP/1.1
@@ -63,6 +71,10 @@ Content-Type: application/json
 ***Create Profile***
 
 Add account profile details.
+
+```curl
+curl --header "Content-Type: application/json" --request POST --data '{ "accountId": 1, "firstName": "John", "lastName": "Doe", "middleName": "Foo", "gender": "male", "birthday": "1990-07-20" }' http://localhost:8088/api/v0/profile
+```
 
 * Request:
 ```json
@@ -100,6 +112,10 @@ Content-Type: application/json
 ***Fetch Profile***
 
 Get profile details.
+
+```curl
+curl http://localhost:8088/api/v0/profile/1
+```
 
 * Request:
 ```json
