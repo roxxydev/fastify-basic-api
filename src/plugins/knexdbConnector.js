@@ -4,7 +4,7 @@ const FastifyPlugin = require('fastify-plugin');
 const Knex = require('knex');
 const Path = require('path');
 
-const knexConnector = (fastify, options = {}, done) => {
+const knexConnector = async (fastify, options = {}, done) => {
 
     const db = Knex({
         client: options.client,
@@ -16,7 +16,7 @@ const knexConnector = (fastify, options = {}, done) => {
         loadExtensions: ['.js']
     };
 
-    db.migrate.latest(migrationConfig);
+    await db.migrate.latest(migrationConfig);
 
     fastify.decorate('knex', db);
 
