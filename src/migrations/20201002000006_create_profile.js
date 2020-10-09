@@ -1,17 +1,17 @@
 'use strict';
 
-const Models = require('../models');
-const profile = Models.profile;
+const Models = require('../models/model');
+
+const { name, props } = Models.profile;
 const account = Models.account;
+
 
 const up = async (knex) => {
 
-    const { name } = profile;
     const exists = await knex.schema.hasTable(name);
 
     if (!exists) {
 
-        const { props } = profile;
         const accountModelName = account.name;
 
         return knex.schema.createTable(name, (table) => {
@@ -36,12 +36,12 @@ const up = async (knex) => {
 
 const down = (knex) => {
 
-    return knex.schema.dropTable(name)
+    return knex.schema.dropTable(name);
 };
 
 const config = {
     transaction: true
-}
+};
 
 module.exports = {
     up,

@@ -1,7 +1,7 @@
 'use strict';
 
 const S = require('fluent-schema');
-const Model = require('../../../schema/models');
+const Model = require('../../../models/model');
 
 
 const { name, props } = Model.profile;
@@ -9,7 +9,7 @@ Object.assign(props, Model.account.props);
 
 const GENDER = {
     MALE: 'male',
-    FEMALE: 'female',
+    FEMALE: 'female'
 };
 
 const profileSchema = {

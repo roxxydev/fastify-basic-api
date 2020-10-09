@@ -1,7 +1,9 @@
 'use strict';
 
-const Models = require('../models');
-const { name, props } = Models.account;
+const Models = require('../models/model');
+
+const { name, props } = Models.scope;
+
 
 const up = async (knex) => {
 
@@ -12,9 +14,13 @@ const up = async (knex) => {
         return knex.schema.createTable(name, (table) => {
 
             table.increments('id');
-            table.string(props.username).notNullable();
-            table.string(props.password).notNullable();
+            table.string(props.name).notNullable();
+            table.string(props.description);
+            table.string(props.module).notNullable();
+            table.boolean(props.active).defaultTo(true).notNullable();
             table.timestamps(true, true);
+
+            table.unique(props.name);
         });
     }
 };
@@ -26,7 +32,7 @@ const down = (knex) => {
 
 const config = {
     transaction: true
-}
+};
 
 module.exports = {
     up,

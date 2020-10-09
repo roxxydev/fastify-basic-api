@@ -2,44 +2,27 @@
 
 const Dotenv = require('dotenv');
 const Path = require('path');
-const Fs = require('fs');
+
 
 Dotenv.config({ path: Path.resolve(__dirname, '../.env') });
 
-let envPath;
-const NODE_ENV = process.env.NODE_ENV;
-
-switch (NODE_ENV) {
-    case 'development':
-        envPath = Path.resolve(__dirname, '../.env.development');
-    break;
-    case 'staging':
-        envPath = Path.resolve(__dirname, '../.env.staging');
-    break;
-    case 'production':
-        envPath = Path.resolve(__dirname, '../.env.production');
-    break;
-    default:
-        envPath = Path.resolve(__dirname, '../.env.local');
-    break;
-};
-
-if (envPath && Fs.existsSync(envPath)) {
-    Dotenv.config({ path: envPath });
-}
+const prefix = process.env.NODE_ENV ? `${process.env.NODE_ENV}_` : '';
 
 const enviroment = {
-  NODE_ENV,
-  APP_HOST: process.env.APP_HOST || '127.0.0.1',
-  APP_PORT: process.env.APP_PORT || 8080,
-  API_PREFIX: process.env.API_PREFIX || 'apis',
-  API_VERSION: process.env.API_VERSION || 'v0',
-  DB_SQL_CLIENT: process.env.DB_SQL_CLIENT || 'pg',
-  DB_SQL_HOST: process.env.DB_SQL_HOST || 'localhost',
-  DB_SQL_USER: process.env.DB_SQL_USER || 'postgres',
-  DB_SQL_PASSWORD: process.env.DB_SQL_PASSWORD || 'postgres',
-  DB_SQL_NAME: process.env.DB_SQL_NAME || 'fastify',
-  DB_SQL_PORT: process.env.DB_SQL_PORT || 5432
+    APP_HOST: process.env[`${prefix}APP_HOST`] || '127.0.0.1',
+    APP_PORT: process.env[`${prefix}APP_PORT`] || 8080,
+    API_PREFIX: process.env[`${prefix}API_PREFIX`] || 'apis',
+    API_VERSION: process.env[`${prefix}API_VERSION`] || 'v0',
+    TOKEN_SECRET: process.env[`${prefix}TOKEN_SECRET`] || 'T0k3nS3cr3t',
+    TOKEN_KEY: process.env[`${prefix}TOKEN_KEY`] || 'notSoSecret',
+    TOKEN_ISSUER: process.env[`${prefix}TOKEN_ISSUER`] || 'api.basic.fastify',
+    TOKEN_EXPIRES: process.env[`${prefix}TOKEN_EXPIRES`] || '30000',
+    DB_SQL_CLIENT: process.env[`${prefix}DB_SQL_CLIENT`] || 'pg',
+    DB_SQL_HOST: process.env[`${prefix}DB_SQL_HOST`] || 'localhost',
+    DB_SQL_USER: process.env[`${prefix}DB_SQL_USER`] || 'postgres',
+    DB_SQL_PASSWORD: process.env[`${prefix}DB_SQL_PASSWORD`] || 'postgres',
+    DB_SQL_NAME: process.env[`${prefix}DB_SQL_NAME`] || 'fastify',
+    DB_SQL_PORT: process.env[`${prefix}DB_SQL_PORT`] || 5432
 };
 
 module.exports = enviroment;

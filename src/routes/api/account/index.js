@@ -1,13 +1,15 @@
 'use strict';
 
-const { AccountService } = require('../../services/account');
+const { AccountService } = require('../../services/accountService');
+const { account: ScopeAccount } = require('../../../models/scope');
+
 
 const {
     createSchema,
     getSchema
 } = require('./schemas');
 
-const accountRoutes = async (app) => {
+const accountRoutes = (app, options, done) => {
 
     const accountService = new AccountService(app);
 
@@ -19,13 +21,21 @@ const accountRoutes = async (app) => {
         return created;
     });
 
-    app.get('/:accountId', { schema: getSchema }, async (request, reply) => {
+    app.get('/:accountId', {
+        schema: getSchema,
+        preValidation: [app.authenticate],
+        config: {
+            scopes: [ScopeAccount.acct_me, ScopeAccount.acct_v]
+        }
+    }, async (request, reply) => {
 
         const { params: { accountId } } = request;
         const account = await accountService.get({ id: accountId });
 
         return account;
     });
+
+    done();
 };
 
 module.exports = accountRoutes;

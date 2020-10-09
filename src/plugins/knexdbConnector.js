@@ -4,7 +4,7 @@ const FastifyPlugin = require('fastify-plugin');
 const Knex = require('knex');
 const Path = require('path');
 
-const knexConnector = async (server, options = {}) => {
+const knexConnector = (fastify, options = {}, done) => {
 
     const db = Knex({
         client: options.client,
@@ -12,13 +12,24 @@ const knexConnector = async (server, options = {}) => {
     });
 
     const migrationConfig = {
-        directory: Path.resolve(`${__dirname}/../schema/migrations`),
+        directory: Path.resolve(`${__dirname}/../migrations`),
         loadExtensions: ['.js']
     };
 
     db.migrate.latest(migrationConfig);
 
-    server.decorate('knex', db);
+    fastify.decorate('knex', db);
+
+    fastify.addHook('onClose', (app) => {
+
+        const { knex } = app;
+        knex.destroy(() => {
+
+            app.log.info('Knex pool destroyed.');
+        });
+    });
+
+    done();
 };
 
 module.exports = FastifyPlugin(knexConnector);

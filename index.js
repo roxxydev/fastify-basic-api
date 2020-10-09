@@ -1,7 +1,10 @@
 /* eslint no-console: 0 */
 'use strict';
 
-require('./src/server')();
+const Environment = require('./src/environment');
+const Server = require('./src/server');
+
+Server(Environment);
 
 process.on('unhandledRejection', (reason, p) => {
 

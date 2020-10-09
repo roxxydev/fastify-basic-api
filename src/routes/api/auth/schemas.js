@@ -1,7 +1,7 @@
 'use strict';
 
 const S = require('fluent-schema');
-const Model = require('../../../models/model');
+const Model = require('../../../schema/models');
 
 
 const { name, props } = Model.account;
