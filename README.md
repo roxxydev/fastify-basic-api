@@ -1,4 +1,4 @@
-An example api server using `fastify`. This uses JWT (JSON Web Token) for authorization and has implemented RBAC (Role-Based Access Control) for restrict and controll what resources can  only access. This has fastify plugin `store` which allows server to switch between ORM/ODM ([Knex](http://knexjs.org/), [Mongoose](https://mongoosejs.com/)) giving option of using either SQL databases supported by [Knex](http://knexjs.org/) or MongoDB of [Mongoose](https://mongoosejs.com/).
+An example api server using [Fastify](https://www.fastify.io/). This uses JWT (JSON Web Token) for authorization and has implemented RBAC (Role-Based Access Control) for restrict and control what resources can only access. It has a fastify plugin `store` which allows server to switch between ORM/ODM ([Knex](http://knexjs.org/), [Mongoose](https://mongoosejs.com/)) giving option of using either SQL databases supported by [Knex](http://knexjs.org/) or MongoDB of [Mongoose](https://mongoosejs.com/).
 
 ## Project setup
 ```
@@ -9,7 +9,7 @@ npm install
 Start fastify server config values set in .env file
 
 #### `npm test`
-Create first database named `testdb` in Postgres. Run test script.
+Create database named `testdb` in Postgres. Run test script. By default the test script uses the [Lab](https://github.com/hapijs/lab) of Hapi. To use [Tap](https://node-tap.org/) in test script, simply declare `TEST_USE_TAP` in `.env` file and set to true.
 
 ---
 
@@ -37,7 +37,7 @@ Create first database named `testdb` in Postgres. Run test script.
 
 ### API Documentation
 
-The project implements `fastify-swagger` for creating Swagger documentation to route `/documentation`.
+The project implements `fastify-swagger` for creating [Swagger](https://swagger.io/) documentation to route `/documentation`.
 
 ---
 
