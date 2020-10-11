@@ -4,7 +4,7 @@ const Models = require('./models/model');
 
 const { props: scopeProps, vals: scopeVals } = Models.scope;
 const { props: roleProps, vals: roleVals } = Models.role;
-const { props: privProps } = Models.privelege;
+const { props: privProps } = Models.privilege;
 
 
 module.exports.run = async (fastify) => {
@@ -21,21 +21,21 @@ module.exports.run = async (fastify) => {
 
             if (!existingScope) {
 
-                await store.scope.create({
+                const data = await store.scope.create({
                     [scopeProps.name]: scope.name,
                     [scopeProps.description]: scope.description,
                     [scopeProps.module]: module,
                     [scopeProps.active]: true
                 });
 
-                fastify.log.info(`added new scope: ${scope.name}`);
+                fastify.log.info(`added new scope: ${data.name} with id ${data.id}`);
             }
         }
     }
 
-    const setupPrivelege = async (role, scopes) => {
+    const setupPrivilege = async (role, scopes) => {
 
-        fastify.log.info(`Setting privelege for ${role}...`);
+        fastify.log.info(`Setting privilege for ${role}...`);
 
         const roleData = await store.role.get({ [roleProps.name]: role });
 
@@ -53,14 +53,14 @@ module.exports.run = async (fastify) => {
                 throw new Error(`No existing scope found for ${scope.name}`);
             }
 
-            const existingPrivileges = await store.privelege.list({
+            const existingPrivileges = await store.privilege.list({
                 [privProps.roleId]: roleData.id,
                 [privProps.scopeId]: resScope.id
             });
 
             if (!existingPrivileges.length) {
 
-                await store.privelege.create({
+                await store.privilege.create({
                     [privProps.roleId]: roleData.id,
                     [privProps.scopeId]: resScope.id
                 });
@@ -86,6 +86,6 @@ module.exports.run = async (fastify) => {
             fastify.log.info(`added new role: ${role.name}`);
         }
 
-        await setupPrivelege(role.name, role.scopes);
+        await setupPrivilege(role.name, role.scopes);
     }
 };

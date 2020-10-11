@@ -34,39 +34,42 @@ class AccountService {
             throw this.app.httpErrors.badRequest('missing payload');
         }
 
-        const existingAccts = await this.get({ [props.username]: payload.username });
+        const existingAcct = await this.store.account.get({ [props.username]: payload.username });
 
-        if (existingAccts.length) {
+        if (existingAcct) {
 
-            throw this.app.httpErrors.conflict(`username ${payload.username} already exists.`);
+            throw this.app.httpErrors.conflict('username already exists.');
         }
 
         if (payload[props.password]) {
             payload[props.password] = await this.app.utils.encryptPswd(payload[props.password]);
         }
 
-        const account = await this.store.account.create(payload);
-        let roleId;
+        return await this.store.runInTransaction(async (trx) => {
 
-        const roleService = new RoleService(this.app);
-        if (payload.role) {
-            const role = await roleService.get({ name: payload.role });
+            const account = await this.store.account.create(payload, trx);
+            let roleId;
 
-            if (role) {
+            const roleService = new RoleService(this.app);
+            if (payload.role) {
+                const role = await roleService.get({ name: payload.role });
+
+                if (role) {
+                    roleId = role.id;
+                }
+            }
+            else {
+                const role = await roleService.get({ name: roles.user.name });
                 roleId = role.id;
             }
-        }
-        else {
-            const role = await roleService.get({ name: roles.user.name });
-            roleId = role.id;
-        }
 
-        await this.store.accountRole.create({
-            [props.roleId]: roleId,
-            [propsRole.accountId]: account.id
+            await this.store.accountRole.create({
+                [propsRole.roleId]: roleId,
+                [propsRole.accountId]: account.id
+            }, trx);
+
+            return account;
         });
-
-        return account;
     }
 
     async get(args) {
@@ -74,7 +77,7 @@ class AccountService {
         const { id, username } = args;
         let account;
 
-        if (!id || !username) {
+        if (!id && !username) {
 
             throw this.app.httpErrors.badRequest('missing parameters.');
         }
@@ -89,7 +92,7 @@ class AccountService {
 
         if (!account) {
 
-            throw this.app.httpErrors.notFound(`account ${id} not found.`);
+            throw this.app.httpErrors.notFound('account not found.');
         }
 
         return account;

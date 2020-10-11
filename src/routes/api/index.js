@@ -7,38 +7,31 @@ const apiRoutes = (fastify, options, done) => {
 
     const authService = new AuthService(fastify);
 
-    fastify.decorate('authenticate', async (request, reply, done) => {
+    fastify.decorateRequest('accountId', '');
 
-        try {
-            const decoded = await request.jwtVerify();
+    fastify.decorate('authenticate', async (request, reply) => {
 
-            const { payload } = decoded;
+        // JWT payload claims
+        const decoded = await request.jwtVerify();
 
-            // For additional security, check if client is subject for authentication
-            const matching = fastify.utils.comparePswd(fastify.config.TOKEN_KEY, payload.key);
-            const jwtMessages = fastify.jwt.options.messages;
+        // For additional security, check if client is subject for authentication
+        const matching = fastify.utils.comparePswd(fastify.conf.TOKEN_KEY, decoded.key);
+        const jwtMessages = fastify.jwt.options.messages;
 
-            if (!matching || !payload.acctId) {
+        if (!matching || !decoded.acctId) {
 
-                throw fastify.httpErrors.badRequest(jwtMessages.authorizationTokenInvalid());
-            }
-
-            const { scopes } = reply.context.config;
-            const isAuthorized = authService.isAuthorize(payload.acctId, scopes);
-
-            if (!isAuthorized) {
-
-                throw fastify.httpErrors.badRequest(jwtMessages.authorizationTokenInvalid());
-            }
-
-            await fastify.decorateRequest('accountId', payload.acctId);
-
-            return done();
+            throw fastify.httpErrors.badRequest(jwtMessages.authorizationTokenInvalid());
         }
-        catch (err) {
 
-            reply.send(err);
+        const { scopes } = reply.context.config;
+        const isAuthorized = authService.isAuthorize(decoded.acctId, scopes);
+
+        if (!isAuthorized) {
+
+            throw fastify.httpErrors.badRequest(jwtMessages.authorizationTokenInvalid());
         }
+
+        request.accountId = decoded.acctId;
     });
 
     fastify.get('/', () => {
@@ -47,6 +40,7 @@ const apiRoutes = (fastify, options, done) => {
     });
 
     fastify.register(FastifySwagger, require('../docs'));
+    fastify.register(require('./auth'), { prefix: 'auth' });
     fastify.register(require('./account'), { prefix: 'account' });
     fastify.register(require('./profile'), { prefix: 'profile' });
 

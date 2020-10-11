@@ -32,6 +32,13 @@ class ProfileService {
             throw this.app.httpErrors.unauthorized();
         }
 
+        const existingProfile = await this.store.profile.list({ [props.accountId]: accountId });
+
+        if (existingProfile) {
+
+            throw this.app.httpErrors.notFound(`profile not found.`);
+        }
+
         if (!payload) {
 
             throw this.app.httpErrors.badRequest('missing payload');
@@ -39,11 +46,6 @@ class ProfileService {
 
         const accountService = new AccountService(this.app);
         const account = await accountService.get({ id: payload.accountId });
-
-        if (!account) {
-
-            throw this.app.httpErrors.badRequest(`account ${accountId} not found.`);
-        }
 
         payload[props.accountId] = account.id;
         delete payload.accountId;
@@ -66,7 +68,7 @@ class ProfileService {
 
         if (!profile) {
 
-            throw this.app.httpErrors.notFound(`profile ${id} not found.`);
+            throw this.app.httpErrors.notFound(`profile not found.`);
         }
 
         return profile;
@@ -82,7 +84,13 @@ class ProfileService {
         const { id, payload = {} } = args;
 
         const profileBefore = await this.get({ id });
-        const profileAfter = await this.store.profile.update(profileBefore.id, payload);
+
+        if (!profileBefore) {
+
+            throw this.app.httpErrors.notFound(`profile not found.`);
+        }
+
+        const profileAfter = await this.store.profile.update({ id: profileBefore.id, payload });
 
         return profileAfter;
     }
@@ -90,6 +98,12 @@ class ProfileService {
     async delete(id) {
 
         const profileBefore = await this.get({ id });
+
+        if (!profileBefore) {
+
+            throw this.app.httpErrors.notFound(`profile not found.`);
+        }
+
         const isDeleted = await this.store.profile.remove(profileBefore.id);
 
         return isDeleted;

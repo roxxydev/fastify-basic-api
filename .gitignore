@@ -17,7 +17,8 @@ pnpm-debug.log*
 *.sln
 *.sw?
 
-coverage/
+coverage
+.nyc_output
 
 *.lock
 *.log

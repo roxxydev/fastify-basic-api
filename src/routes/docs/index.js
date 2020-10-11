@@ -20,6 +20,7 @@ module.exports = {
         consumes: ['application/json'],
         produces: ['application/json'],
         tags: [
+            { name: 'auth', description: 'Authentication related end-points' },
             { name: 'account', description: 'Account related end-points' },
             { name: 'profile', description: 'Profile related end-points' }
         ]

@@ -2,7 +2,7 @@
 
 const Models = require('../models/model');
 
-const { name, props } = Models.privelege;
+const { name, props } = Models.privilege;
 const { name: roleName } = Models.role;
 const { name: scopeName } = Models.scope;
 

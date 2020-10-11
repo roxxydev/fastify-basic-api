@@ -25,7 +25,7 @@ class RoleService {
         const { id, name } = args;
         let role;
 
-        if (!id || !name) {
+        if (!id && !name) {
 
             throw this.app.httpErrors.badRequest('missing parameters.');
         }

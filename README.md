@@ -1,4 +1,4 @@
-Example api using Fastify.
+An example api server using `fastify`. This uses JWT (JSON Web Token) for authorization and has implemented RBAC (Role-Based Access Control) for restrict and controll what resources can  only access. This has fastify plugin `store` which allows server to switch between ORM/ODM ([Knex](http://knexjs.org/), [Mongoose](https://mongoosejs.com/)) giving option of using either SQL databases supported by [Knex](http://knexjs.org/) or MongoDB of [Mongoose](https://mongoosejs.com/).
 
 ## Project setup
 ```
@@ -8,11 +8,40 @@ npm install
 #### `npm start`
 Start fastify server config values set in .env file
 
+#### `npm test`
+Create first database named `testdb` in Postgres. Run test script.
+
 ---
 
-### Account
+### Structure
 
-***Register***
+* _**server.js**_ - Creates fastify server instance.
+* _**routes/services/**_ - Contains logic needed of routes.
+* _**routes/api/**_ - Routes of fastify.
+* _**routes/api/*/schemas.js**_ - Contains validation schemas using fluent-schema.
+* _**utils**_ - Contains utility methods.
+* _**setup**_ - Script setup before starting server. Initially contain setup for creating data like roles and scopes to database.
+* _**enviroment**_ - Configuration values.
+* _**plugins**_ - Contains fastify plugins.
+* _**plugins/store.js**_ - Fastify plugin creting `store` server property that have interface for database CRUD operations wrapper for either using Knex or Mongoose.
+* _**models**_ - Contains database related schemas, properties and operations.
+* _**models/model.js**_ - Contains property name and values used in database schema.
+* _**models/roles.js**_ - Initial roles used in this API.
+* _**models/scope.js**_ - Initial scopes used in this API.
+* _**models/operations.js**_ - Interface implementation of CRUD database transactions. Each filename represent the name of the table/schema which also matches the model name defined in model.js.
+* _**models/knex**_ - Fastify plugin `store` will resolve to this directory if mapper value is `knex`.
+* _**models/mongoose**_ - Fastify plugin `store` will resolve to this directory if mapper value is `mongoose`.
+* _**migrations**_ - Contains migration scripts used in knex.
+
+---
+
+### API Documentation
+
+The project implements `fastify-swagger` for creating Swagger documentation to route `/documentation`.
+
+---
+
+### Example
 
 Create account passing basic account information.
 
@@ -40,106 +69,5 @@ Content-Type: application/json
    "id": 1,
    "username": "foo10001",
    "created_at": "2020-10-04T16:00:07.726Z"
-}
-```
-
-***Get Account***
-
-Fetch account details.
-
-```curl
-curl http://localhost:8088/api/v0/account/1
-```
-
-* Request:
-```json
-GET /api/v0/account/:accountId HTTP/1.1
-Accept: application/json
-```
-* Response:
-```json
-HTTP/1.1 200 OK
-Content-Type: application/json
-
-{
-   "id": 1,
-   "username": "foo10001",
-   "created_at": "2020-10-04T16:00:07.726Z"
-}
-```
-
----
-
-### Profile
-
-***Create Profile***
-
-Add account profile details.
-
-```curl
-curl --header "Content-Type: application/json" --request POST --data '{ "accountId": 1, "firstName": "John", "lastName": "Doe", "middleName": "Foo", "gender": "male", "birthday": "1990-07-20" }' http://localhost:8088/api/v0/profile
-```
-
-* Request:
-```json
-POST /api/v0/profile HTTP/1.1
-Accept: application/json
-Content-Type: application/json
-
-{
-    "accountId": 1,
-    "firstName": "John",
-    "lastName": "Doe",
-    "middleName": "Foo",
-    "gender": "male",
-    "birthday": "1990-07-20"
-}
-```
-* Response:
-```json
-HTTP/1.1 200 OK
-Content-Type: application/json
-
-{
-    "id": 1,
-    "account_id": 1,
-    "firstName":"John",
-    "lastName":"Doe",
-    "middleName":"Foo",
-    "gender":"male",
-    "birthday":"1990-07-19T16:00:00.000Z",
-    "created_at":"2020-10-04T16:11:08.242Z",
-    "updated_at":"2020-10-04T16:11:08.242Z"
-}
-```
-
-***GET Profile***
-
-Fetch profile details.
-
-```curl
-curl http://localhost:8088/api/v0/profile/1
-```
-
-* Request:
-```json
-GET /api/v0/profile/:profileId HTTP/1.1
-Accept: application/json
-```
-* Response:
-```json
-HTTP/1.1 200 OK
-Content-Type: application/json
-
-{
-    "id": 1,
-    "account_id": 1,
-    "firstName":"John",
-    "lastName":"Doe",
-    "middleName":"Foo",
-    "gender":"male",
-    "birthday":"1990-07-19T16:00:00.000Z",
-    "created_at":"2020-10-04T16:11:08.242Z",
-    "updated_at":"2020-10-04T16:11:08.242Z"
 }
 ```

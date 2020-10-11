@@ -39,7 +39,7 @@ module.exports = {
             active: 'active'
         }
     },
-    privelege: {
+    privilege: {
         name: 'privilege',
         props: {
             name: 'name',

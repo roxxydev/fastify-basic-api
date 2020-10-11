@@ -6,7 +6,8 @@ const { account: ScopeAccount } = require('../../../models/scope');
 
 const {
     createSchema,
-    getSchema
+    getOwnAccountSchema,
+    getAccountSchema
 } = require('./schemas');
 
 const accountRoutes = (app, options, done) => {
@@ -18,21 +19,34 @@ const accountRoutes = (app, options, done) => {
         const { body } = request;
         const created = await accountService.create({ payload: body });
 
-        return created;
+        reply.send(created);
+    });
+
+    app.get('/', {
+        schema: getOwnAccountSchema,
+        preValidation: [app.authenticate],
+        config: {
+            scopes: [ScopeAccount.acct_me]
+        }
+    }, async (request, reply) => {
+
+        const account = await accountService.get({ id: request.accountId });
+
+        reply.send(account);
     });
 
     app.get('/:accountId', {
-        schema: getSchema,
+        schema: getAccountSchema,
         preValidation: [app.authenticate],
         config: {
-            scopes: [ScopeAccount.acct_me, ScopeAccount.acct_v]
+            scopes: [ScopeAccount.acct_v]
         }
     }, async (request, reply) => {
 
         const { params: { accountId } } = request;
         const account = await accountService.get({ id: accountId });
 
-        return account;
+        reply.send(account);
     });
 
     done();

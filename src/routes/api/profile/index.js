@@ -30,7 +30,7 @@ const profileRoutes = (app, options, done) => {
         const accountId = request.accountId;
         const created = await profileService.create({ accountId, payload: body });
 
-        return created;
+        reply.send(created);
     });
 
     // get all
@@ -45,7 +45,7 @@ const profileRoutes = (app, options, done) => {
         // TODO: Create search params to pass to filter
         const profiles = await profileService.getAll({});
 
-        return profiles;
+        reply.send(profiles);
     });
 
     // get one
@@ -60,7 +60,7 @@ const profileRoutes = (app, options, done) => {
         const { params: { profileId } } = request;
         const profile = await profileService.get({ id: profileId });
 
-        return profile;
+        reply.send(profile);
     });
 
     // update
@@ -76,7 +76,7 @@ const profileRoutes = (app, options, done) => {
         const { body } = request;
         const updated = await profileService.update({ id: profileId, profile: body });
 
-        return updated;
+        reply.send(updated);
     });
 
     // delete
@@ -91,7 +91,7 @@ const profileRoutes = (app, options, done) => {
         const { params: { profileId } } = request;
         const deleted = await profileService.delete({ id: profileId });
 
-        return deleted;
+        reply.send(deleted);
     });
 
     done();

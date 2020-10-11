@@ -1,10 +1,10 @@
 'use strict';
 
 const S = require('fluent-schema');
-const Model = require('../../../schema/models');
+const Model = require('../../../models/model');
 
 
-const { name, props } = Model.account;
+const { props } = Model.account;
 
 const accountSchema = {
     accountId: {
@@ -28,22 +28,26 @@ const accountSchema = {
     }
 };
 
-const tags = [name];
-const paramsSchema = S.object().prop(accountSchema.accountId.key, accountSchema.accountId.type);
+const tags = ['auth'];
+// const paramsSchema = S.object().prop(accountSchema.accountId.key, accountSchema.accountId.type);
 
-const createSchema = {
+const loginSchema = {
     tags,
+    description: 'Account login. Authenticate user and return token',
     body: S.object()
         .prop(accountSchema.username.key, accountSchema.username.type)
         .prop(accountSchema.password.key, accountSchema.password.type)
 };
 
-const geSchema = {
-    tags,
-    params: paramsSchema
+const authHeaderSchema = {
+    headers: S.object().prop('Authorization', S.string().required())
 };
 
 module.exports = {
-    createSchema,
-    geSchema
+    authHeaderSchema,
+    loginSchema,
+    refreshTokenSchema: {
+        tags: ['auth'],
+        ...authHeaderSchema
+    }
 };

@@ -2,6 +2,7 @@
 
 const S = require('fluent-schema');
 const Model = require('../../../models/model');
+const { authHeaderSchema } = require('../auth/schemas');
 
 
 const { name, props } = Model.account;
@@ -33,17 +34,25 @@ const paramsSchema = S.object().prop(accountSchema.accountId.key, accountSchema.
 
 const createSchema = {
     tags,
+    description: 'Create account',
     body: S.object()
         .prop(accountSchema.username.key, accountSchema.username.type)
         .prop(accountSchema.password.key, accountSchema.password.type)
 };
 
-const geSchema = {
+const getAccountSchema = {
     tags,
-    params: paramsSchema
+    params: paramsSchema,
+    ...authHeaderSchema
+};
+
+const getOwnAccountSchema = {
+    tags,
+    ...authHeaderSchema
 };
 
 module.exports = {
     createSchema,
-    geSchema
+    getAccountSchema,
+    getOwnAccountSchema
 };

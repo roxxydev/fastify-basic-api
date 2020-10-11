@@ -17,12 +17,12 @@ const enviroment = {
     TOKEN_KEY: process.env[`${prefix}TOKEN_KEY`] || 'notSoSecret',
     TOKEN_ISSUER: process.env[`${prefix}TOKEN_ISSUER`] || 'api.basic.fastify',
     TOKEN_EXPIRES: process.env[`${prefix}TOKEN_EXPIRES`] || '30000',
-    DB_SQL_CLIENT: process.env[`${prefix}DB_SQL_CLIENT`] || 'pg',
-    DB_SQL_HOST: process.env[`${prefix}DB_SQL_HOST`] || 'localhost',
-    DB_SQL_USER: process.env[`${prefix}DB_SQL_USER`] || 'postgres',
-    DB_SQL_PASSWORD: process.env[`${prefix}DB_SQL_PASSWORD`] || 'postgres',
-    DB_SQL_NAME: process.env[`${prefix}DB_SQL_NAME`] || 'fastify',
-    DB_SQL_PORT: process.env[`${prefix}DB_SQL_PORT`] || 5432
+    DB_CLIENT: process.env[`${prefix}DB_CLIENT`] || 'pg',
+    DB_HOST: process.env[`${prefix}DB_HOST`] || 'localhost',
+    DB_USER: process.env[`${prefix}DB_USER`] || 'postgres',
+    DB_PASSWORD: process.env[`${prefix}DB_PASSWORD`] || 'postgres',
+    DB_NAME: process.env[`${prefix}DB_NAME`] || 'fastify',
+    DB_PORT: process.env[`${prefix}DB_PORT`] || 5432
 };
 
 module.exports = enviroment;

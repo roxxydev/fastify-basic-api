@@ -1,84 +1,122 @@
 'use strict';
 
-const Code = require('@hapi/code');
-const Lab = require('@hapi/lab');
 const Knex = require('knex');
 const KnexCleaner = require('knex-cleaner');
 const Server = require('../src/server');
+const Tap = require('tap');
+const Lab = require('@hapi/lab');
+const Code = require('@hapi/code');
+const Axios = require('axios');
 
 const expect = Code.expect;
 const lab = exports.lab = Lab.script();
-const describe = lab.describe;
-const it = lab.it;
 
+/* eslint-disable prefer-const */
+let { it, before, after, describe } = lab;
 
-describe('lib', () => {
+if (process.env.TEST_USE_TAP) {
+    Tap.mochaGlobals();
+}
+
+describe('Server', () => {
 
     let app;
+    let knex;
+    let address;
+    let axios;
+    let account;
+    const headerToken = {};
+
+    const testAccount = {
+        username: 'jdoe1001',
+        password: 'P@ssw0rd!'
+    };
 
     const environment = {
-        APP_HOST:  '127.0.0.1',
-        APP_PORT: 8080,
+        APP_HOST: '127.0.0.1',
+        APP_PORT: 8088,
         API_PREFIX: 'apis',
         API_VERSION: 'v0',
         TOKEN_SECRET: 'T0k3nS3cr3tT3st',
         TOKEN_KEY: 'notSoSecretTestKey',
         TOKEN_ISSUER: 'api.basic.fastify.test',
         TOKEN_EXPIRES: '30000',
-        DB_SQL_CLIENT: 'pg',
-        DB_SQL_HOST: 'localhost',
-        DB_SQL_USER: 'postgres',
-        DB_SQL_PASSWORD: 'postgres',
-        DB_SQL_NAME: 'testdb',
-        DB_SQL_PORT: 5432
+        DB_CLIENT: 'pg',
+        DB_HOST: 'localhost',
+        DB_USER: 'postgres',
+        DB_PASSWORD: 'postgres',
+        DB_NAME: 'testdb',
+        DB_PORT: 5432
     };
 
-    lab.before(async () => {
+    before(async () => {
 
-        console.log('Initializing test server instance...');
+        console.log('x+x+x+x+x+x+x+x+x+x+x+x+ Initializing test server instance x+x+x+x+x+x+x+x+x+x+x+x+x+x+x');
+
         app = await Server(environment);
-    });
 
-    lab.after(async () => {
-
-        console.log('Test clean up...');
-
-        const knex = app.knex || Knex({
-            client: environment.DB_SQL_CLIENT,
+        knex = app.knex || Knex({
+            client: environment.DB_CLIENT,
             connection: {
-                host: environment.DB_SQL_HOST,
-                user: environment.DB_SQL_USER,
-                password: environment.DB_SQL_PASSWORD,
-                database: environment.DB_SQL_NAME,
-                port: environment.DB_SQL_PORT
+                host: environment.DB_HOST,
+                user: environment.DB_USER,
+                password: environment.DB_PASSWORD,
+                database: environment.DB_NAME,
+                port: environment.DB_PORT
             }
         });
 
+        address = `${app.conf.baseUrl}/${app.conf.prefix}`;
+        axios = Axios.create({ baseURL: address });
+        console.log(`x+x+x+x+x+x+x+x+x+x+x+x+ Address: ${address} x+x+x+x+x+x+x+x+x+x+x+x+x+x+x`);
+    });
+
+    after(async () => {
+
         if (knex) {
             await KnexCleaner.clean(knex);
-            console.log('Knex clean up finished!');
         }
+
+        app.close();
     });
 
     it('POST /account/register', async () => {
 
-        const payload = {
-            username: 'jdoe001',
-            password: 'P@ssw0rd!'
-        };
+        const resRegister = await axios.post('/account/register', testAccount);
 
-        await app.inject({
-            method: 'POST',
-            url: `${app.prefix}/account/register`,
-            payload
-        }, (error, response) => {
+        expect(resRegister.data).to.be.object();
+        expect(resRegister.data.username).to.be.not.null();
+    });
 
-            expect(response).to.be.an.object;
-            expect(error).to.be.null;
-        });
+    it('POST /auth/login', async () => {
+
+        const resLogin = await axios.post('/auth/login', testAccount);
+
+        expect(resLogin.data).to.be.object();
+        expect(resLogin.headers).to.be.object();
+        expect(resLogin.headers.authorization).to.be.string().and.to.contains('Bearer');
+
+        /* eslint-disable dot-notation */
+        headerToken.authorization = resLogin.headers.authorization;
+    });
+
+    it('GET /account', async () => {
+
+        const resAccount = await axios.get('/account', { headers: headerToken });
+
+        expect(resAccount.data).to.be.object();
+        expect(resAccount.data.username).to.be.a.string();
+        expect(resAccount.id).to.be.not.null();
+
+        account = resAccount.data;
     });
 
     it('GET /account/:accountId', async () => {
 
+        const resAccount = await axios.get(`/account/${account.id}`, { headers: headerToken });
+
+        expect(resAccount.data).to.be.object();
+        expect(resAccount.data.username).to.be.a.string();
+        expect(resAccount.id).to.be.not.null();
     });
 });

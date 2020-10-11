@@ -4,7 +4,6 @@
 const Fastify = require('fastify');
 const FastifySensible = require('fastify-sensible');
 const FastifyJwt = require('fastify-jwt');
-const KnexConnector = require('./plugins/knexdbConnector');
 const Store = require('./plugins/store');
 const Routes = require('./routes/api');
 const Setup = require('./setup');
@@ -50,47 +49,48 @@ module.exports = async (environment) => {
         Object.assign(utilities, method);
     }
 
-    fastify.log.info(`Setting up objects...`);
+    fastify.log.info(`Setting up config...`);
+
     await fastify.decorate('conf', environment);
     await fastify.decorate('utils', utilities);
 
     fastify.log.info(`Setting up logger...`);
     await fastify.register(FastifySensible);
 
-    await fastify.addHook('onSend', (request, reply, payload) => {
+    await fastify.addHook('onSend', (request, reply, payload, done) => {
 
         if (payload) {
             fastify.log.debug({ body: payload }, `response payload reqId: ${ request.id }`);
         }
+
+        done();
     });
 
-    await fastify.addHook('preValidation', (request, reply) => {
+    await fastify.addHook('preValidation', (request, reply, done) => {
 
         if (request && request.body) {
             fastify.log.debug({ body: request.body }, `request payload reqId: ${ request.id }`);
         }
-    });
 
-    fastify.log.info(`Setting up query builder...`);
-    const config = fastify.conf;
-    await fastify.register(KnexConnector, {
-        client: config.DB_SQL_CLIENT,
-        connection: {
-            host: config.DB_SQL_HOST,
-            user: config.DB_SQL_USER,
-            password: config.DB_SQL_PASSWORD,
-            database: config.DB_SQL_NAME,
-            port: config.DB_SQL_PORT
-        }
+        done();
     });
 
     fastify.log.info(`Setting up store...`);
+    const config = fastify.conf;
     await fastify.register(Store, {
         mapper: 'knex',
-        dir: Path.resolve(`${__dirname}/models/operations`)
+        dir: Path.resolve(`${__dirname}/models/operations`),
+        client: config.DB_CLIENT,
+        connection: {
+            host: config.DB_HOST,
+            port: config.DB_PORT,
+            user: config.DB_USER,
+            password: config.DB_PASSWORD,
+            database: config.DB_NAME
+        }
     });
 
-    fastify.log.info(`Setting roles and priveleges...`);
+    fastify.log.info(`Setting roles and privileges...`);
     await Setup.run(fastify);
 
     fastify.log.info(`Setting up authentication...`);
@@ -99,6 +99,9 @@ module.exports = async (environment) => {
         sign: {
             issuer: config.TOKEN_ISSUER,
             expiresIn: config.TOKEN_EXPIRES
+        },
+        verify: {
+            issuer: config.TOKEN_ISSUER
         },
         messages: {
             badRequestErrorMessage: 'Invalid authorization header format',
@@ -117,12 +120,13 @@ module.exports = async (environment) => {
         fastify.log.info(`Added routes:\n${ fastify.printRoutes() }`);
     });
 
-    await fastify.register(Routes, {
-        prefix: `${ config.API_PREFIX }/${ config.API_VERSION }`
-    });
+    const prefix = `${ config.API_PREFIX }/${ config.API_VERSION }`;
+    await fastify.register(Routes, { prefix });
 
     try {
-        await fastify.listen(config.APP_PORT, config.APP_HOST);
+        const address = await fastify.listen(config.APP_PORT, config.APP_HOST);
+        fastify.conf.baseUrl = address;
+        fastify.conf.prefix = prefix;
         fastify.log.info(fastify.initialConfig, 'Intiialized server with config: ');
     }
     catch (err) {
