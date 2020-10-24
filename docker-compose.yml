@@ -1,0 +1,44 @@
+services:
+    app:
+      container_name: "app"
+      build: .
+      depends_on:
+        - db
+      environment:
+        - DB_HOST=db
+      ports:
+        - 8088
+      networks:
+        - backend
+      volumes:
+        - .:/app/
+        - /app/node_modules
+
+    db:
+      container_name: "database"
+      image: postgres:12.4
+      depends_on:
+        - db-test
+      ports:
+        - ${DB_PORT}
+      environment:
+        POSTGRES_USER: ${DB_USER}
+        POSTGRES_PASSWORD: ${DB_PASSWORD}
+        POSTGRES_DB: ${DB_NAME}
+      networks:
+        - backend
+
+    db-test:
+      container_name: "database-test"
+      image: postgres:12.4
+      ports:
+        - ${DB_PORT}
+      environment:
+        POSTGRES_USER: ${DB_USER}
+        POSTGRES_PASSWORD: ${DB_PASSWORD}
+        POSTGRES_DB: 'testdb'
+      networks:
+        - backend
+
+networks:
+  backend:

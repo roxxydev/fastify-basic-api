@@ -7,6 +7,7 @@ const Tap = require('tap');
 const Lab = require('@hapi/lab');
 const Code = require('@hapi/code');
 const Axios = require('axios');
+const Environment = require('../src/environment');
 
 const expect = Code.expect;
 const lab = exports.lab = Lab.script();
@@ -42,11 +43,11 @@ describe('Server', () => {
         TOKEN_ISSUER: 'api.basic.fastify.test',
         TOKEN_EXPIRES: '30000',
         DB_CLIENT: 'pg',
-        DB_HOST: 'localhost',
-        DB_USER: 'postgres',
-        DB_PASSWORD: 'postgres',
+        DB_HOST: Environment.DB_HOST,
+        DB_USER: Environment.DB_USER,
+        DB_PASSWORD: Environment.DB_PASSWORD,
         DB_NAME: 'testdb',
-        DB_PORT: 5432
+        DB_PORT: Environment.DB_PORT
     };
 
     before(async () => {
@@ -56,13 +57,13 @@ describe('Server', () => {
         app = await Server(environment);
 
         knex = app.knex || Knex({
-            client: environment.DB_CLIENT,
+            client: Environment.DB_CLIENT,
             connection: {
-                host: environment.DB_HOST,
-                user: environment.DB_USER,
-                password: environment.DB_PASSWORD,
-                database: environment.DB_NAME,
-                port: environment.DB_PORT
+                host: Environment.DB_HOST,
+                user: Environment.DB_USER,
+                password: Environment.DB_PASSWORD,
+                database: Environment.DB_TEST_NAME,
+                port: Environment.DB_PORT
             }
         });
 
