@@ -7,7 +7,7 @@ services:
       environment:
         - DB_HOST=db
       ports:
-        - 8088
+        - 8088:8088
       networks:
         - backend
       volumes:
