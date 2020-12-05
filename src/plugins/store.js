@@ -6,28 +6,12 @@ const Path = require('path');
 const Knex = require('knex');
 const Mongoose = require('mongoose');
 
-
 const store = {};
 
-const addModelCrud = (modelName, modelOpsModulePath) => {
-
-    const Ops = require(modelOpsModulePath);
-
-    const model = new Ops(store.mapperInstance);
-    store[modelName] = model;
-
-    // const ops = Object.getOwnPropertyNames(Object.getPrototypeOf(model));
-    // ops.shift();
-
-    // for (const prop of ops) {
-    //     // const method = { [prop]: model[prop] };
-    //     store[modelName][prop] = store[modelName][prop];
-    // }
-};
 
 const knexInit = async (fastify, options) => {
 
-    const db = Knex({
+    const knex = Knex({
         client: options.client,
         connection: options.connection
     });
@@ -37,7 +21,7 @@ const knexInit = async (fastify, options) => {
         loadExtensions: ['.js']
     };
 
-    await db.migrate.latest(migrationConfig);
+    await knex.migrate.latest(migrationConfig);
 
     fastify.addHook('onClose', (app) => {
 
@@ -49,23 +33,49 @@ const knexInit = async (fastify, options) => {
         }
     });
 
-    return db;
+    knex.utils = fastify.utils;
+
+    return knex;
 };
 
 const mongooseInit = async (fastify, options) => {
 
-    const mongoose = new Mongoose.Mongoose();
     const { host, port, username, password, database } = options.connection;
+    const connString = `mongodb://${username}:${password}@${host}:${port}/${database}`;
 
-    await mongoose.connect(`mongodb://${username}:${password}@${host}:${port}/${database}`, {
-        useNewUrlParser: true,
-        keepAlive: true,
-        keepAliveInitialDelay: 300000
+    const dbConnection = await Mongoose.connect(
+        connString,
+        {
+            useNewUrlParser: true,
+            keepAlive: true,
+            keepAliveInitialDelay: 300000
+        });
+
+    const directory = Path.resolve(`${__dirname}/../schemas`);
+    const mongooseObj = {
+        connection: dbConnection,
+        models: {}
+    };
+
+    for (const file of files) {
+        const modelPath = Path.resolve(directory, file);
+        const Model = require(modelPath);
+        mongooseObj.models[Model.instance.constructor.modelName] = Model;
+    }
+
+    fastify.addHook('onClose', (app) => {
+
+        if (app.store && app.store.mapperInstance && app.store.mapperInstance.dbConnection) {
+            app.store.mapperInstance.dbConnection.close(() => {
+
+                app.log.info('Mongoose connection is disconnected through app termination.');
+            });
+        }
     });
 
-    // TODO: Create mongodb schemas
+    mongooseObj.utils = fastify.utils;
 
-    return mongoose;
+    return mongooseObj;
 };
 
 
@@ -87,7 +97,7 @@ const runInTransaction = async (task) => {
     }
     else if (store.mapper === 'mongoose') {
 
-        const session =  await store.mapperInstance.startSession();
+        const session =  await store.mapperInstance.connection.startSession();
 
         return session.withTransaction(async () => {
 
@@ -121,7 +131,11 @@ const init = async (fastify, options = {}, done) => {
     for (const file of files) {
         const modelName = Path.parse(file).name;
         const modelOpsModulePath = Path.resolve(operationsPath, file);
-        addModelCrud(modelName, modelOpsModulePath);
+
+        const Ops = require(modelOpsModulePath);
+        const model = new Ops(store.mapperInstance);
+
+        store[modelName] = model;
     }
 
     store.runInTransaction = runInTransaction;

@@ -77,6 +77,8 @@ module.exports = async (environment) => {
 
     fastify.log.info(`Setting up store...`);
     const config = fastify.conf;
+
+    // Using Postgres
     await fastify.register(Store, {
         mapper: 'knex',
         dir: Path.resolve(`${__dirname}/models/operations`),
@@ -89,6 +91,22 @@ module.exports = async (environment) => {
             database: config.DB_NAME
         }
     });
+
+    // Using MongoDB
+    /*
+    await fastify.register(Store, {
+        mapper: 'mongoose',
+        dir: Path.resolve(`${__dirname}/models/operations`),
+        client: config.DB_CLIENT,
+        connection: {
+            host: config.DB_HOST,
+            port: config.DB_PORT,
+            user: config.DB_USER,
+            password: config.DB_PASSWORD,
+            database: config.DB_NAME
+        }
+    });
+    */
 
     fastify.log.info(`Setting roles and privileges...`);
     await Setup.run(fastify);

@@ -28,10 +28,9 @@ Create database named `testdb` in Postgres. Run test script. By default the test
 * _**models/model.js**_ - Contains property name and values used in database schema.
 * _**models/roles.js**_ - Initial roles used in this API.
 * _**models/scope.js**_ - Initial scopes used in this API.
-* _**models/operations.js**_ - Interface implementation of CRUD database transactions. Each filename represent the name of the table/schema which also matches the model name defined in model.js.
-* _**models/knex**_ - Fastify plugin `store` will resolve to this directory if mapper value is `knex`.
-* _**models/mongoose**_ - Fastify plugin `store` will resolve to this directory if mapper value is `mongoose`.
+* _**models/operations/**_ - Interface implementation of CRUD database transactions. Each filename represent the name of the table/schema which also matches the model name defined in model.js.
 * _**migrations**_ - Contains migration scripts used in knex.
+* _**schemas**_ - Contains model schemas for moongose.
 
 ---
 

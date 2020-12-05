@@ -25,6 +25,7 @@
     "fastify-swagger": "3.4.x",
     "fluent-schema": "1.0.x",
     "knex": "0.21.x",
+    "lodash": "4.17.x",
     "mongoose": "5.10.x",
     "pg": "8.3.x",
     "pino-pretty": "4.2.x"

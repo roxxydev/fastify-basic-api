@@ -1,5 +1,6 @@
 'use strict';
 
 module.exports = [
-    require('./encryption')
+    require('./encryption'),
+    require('./modelUtils')
 ];

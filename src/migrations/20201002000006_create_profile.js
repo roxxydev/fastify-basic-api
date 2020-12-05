@@ -3,7 +3,7 @@
 const Models = require('../models/model');
 
 const { name, props } = Models.profile;
-const account = Models.account;
+const { name: accountName } = Models.account;
 
 
 const up = async (knex) => {
@@ -11,8 +11,6 @@ const up = async (knex) => {
     const exists = await knex.schema.hasTable(name);
 
     if (!exists) {
-
-        const accountModelName = account.name;
 
         return knex.schema.createTable(name, (table) => {
 
@@ -27,7 +25,7 @@ const up = async (knex) => {
             table.integer('account_id')
                 .notNullable()
                 .references('id')
-                .inTable(accountModelName);
+                .inTable(accountName);
 
             table.unique(['id', 'account_id']);
         });
